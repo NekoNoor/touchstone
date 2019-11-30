@@ -6,73 +6,74 @@
 #    By: nschat <nschat@student.codam.nl>             +#+                      #
 #                                                    +#+                       #
 #    Created: 2019/10/30 12:13:23 by nschat        #+#    #+#                  #
-#    Updated: 2019/11/22 18:16:02 by nschat        ########   odam.nl          #
+#    Updated: 2019/11/30 23:41:34 by nschat        ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
 CC = gcc
-AR = ar rcs
-CFLAGS = -Wall -Wextra -Werror -I include
-ifeq (${DEBUG},true)
-	CFLAGS := -g -fprofile-instr-generate -fcoverage-mapping $(CFLAGS)
-endif
+CFLAGS = -Wall -Wextra -Werror -I include -I libft/include
 
-SRC = touchstone.c
+SRC = ts_print.c
 
 ODIR = obj
 OBJ = $(addprefix $(ODIR)/,$(SRC:.c=.o))
 
-NAME = touchstone.a
+TSRC = test.c
+TOBJ = $(addprefix $(ODIR)/,$(TSRC:.c=.o))
 
-define ASCII
- __                           __               __
-/\\ \\__                       /\\ \\             /\\ \\__
-\\ \\ ,_\\   ___   __  __    ___\\ \\ \\___     ____\\ \\ ,_\\   ___     ___      __
- \\ \\ \\/  / __`\\/\\ \\/\\ \\  /'___\\ \\  _ `\\  /',__\\\\ \\ \\/  / __`\\ /' _ `\\  /'__`\\
-  \\ \\ \\_/\\ \\L\\ \\ \\ \\_\\ \\/\\ \\__/\\ \\ \\ \\ \\/\\__, `\\\\ \\ \\_/\\ \\L\\ \\/\\ \\/\\ \\/\\  __/
-   \\ \\__\\ \\____/\\ \\____/\\ \\____\\\\ \\_\\ \\_\\/\\____/ \\ \\__\\ \\____/\\ \\_\\ \\_\\ \\____\\
-    \\/__/\\/___/  \\/___/  \\/____/ \\/_/\\/_/\\/___/   \\/__/\\/___/  \\/_/\\/_/\\/____/
-endef
+NAME = libtouchstone.a
 
-CRED = \x1b[31m
-CGREEN = \x1b[32m
-CYELLOW = \x1b[33m
-CBLUE = \x1b[34m
-CCYAN = \x1b[36m
-CDEFAULT = \x1b[39m
-CDEF = $(CDEFAULT)
+LIB = libft/libft.a
 
-CMINUS = $(CRED)[-]$(CDEF)
-CPLUS = $(CGREEN)[+]$(CDEF)
-CNORM = $(CYELLOW)[~]$(CDEF)
+RED = \x1b[31m
+GREEN = \x1b[32m
+YELLOW = \x1b[33m
+BLUE = \x1b[34m
+CYAN = \x1b[36m
+DEFAULT = \x1b[39m
+DEF = $(DEFAULT)
 
-TIME = $(CCYAN)[$$(date +"%H:%M:%S")]$(CDEF)
+MINUS = $(RED)[-]$(DEF)
+PLUS = $(GREEN)[+]$(DEF)
+NORM = $(YELLOW)[~]$(DEF)
 
-vpath %.c src
+TIME = $(CYAN)[$$(date +"%H:%M:%S")]$(DEF)
 
-.PHONY: clean fclean test
+vpath %.c src tests
 
-all: ascii $(NAME)
+.PHONY: clean fclean libclean
 
-export ASCII
-ascii:
-	@echo "\n$(CYELLOW)$$ASCII$(CDEF)\n"
+all: $(NAME)
 
-$(NAME): $(OBJ)
-	@echo "$(TIME) $(CPLUS) $(CGREEN)Adding objects to $@...$(CDEF)"
-	@$(AR) $@ $^
+$(NAME): $(LIB) $(OBJ)
+	@printf "$(TIME) $(PLUS) $(CYAN)$^ $(GREEN)-> $(BLUE)$@$(DEF)\n"
+	@libtool -static -o $@ $^
+
+$(LIB):
+	@printf "$(TIME) $(NORM) $(YELLOW)make -> $(dir $(LIB))$(DEF)\n"
+	@$(MAKE) -C $(dir $(LIB))
+
+test: $(NAME) | $(TOBJ)
+	@printf "$(TIME) $(PLUS) $(CYAN)$| $(GREEN)-> $(BLUE)$@$(DEF)\n"
+	@$(CC) $(CFLAGS) -L . -ltouchstone -o $@ $|
+	@printf "$(TIME) $(NORM) $(YELLOW)./$@$(DEF)\n"
+	@./$@
 
 $(ODIR)/%.o: %.c
-	@echo "$(TIME) $(CPLUS) $(CBLUE)Compiling $< to $@...$(CDEF)"
+	@printf "$(TIME) $(PLUS) $(CYAN)$< $(GREEN)-> $(BLUE)$@$(DEF)\n"
 	@mkdir -p $(ODIR)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@echo "$(TIME) $(CMINUS) $(CRED)Cleaning object files...$(CDEF)"
+	@printf "$(TIME) $(MINUS) $(RED)$(ODIR)$(DEF)\n"
 	@$(RM) -r $(ODIR)
 
 fclean: clean
-	@echo "$(TIME) $(CMINUS) $(CRED)Cleaning $(NAME)...$(CDEF)"
-	@$(RM) $(NAME)
+	@printf "$(TIME) $(MINUS) $(RED)$(NAME)$(DEF)\n"
+	@$(RM) $(NAME) test
 
-re: fclean all
+libclean:
+	@printf "$(TIME) $(NORM) $(YELLOW)make fclean -> $(dir $(LIB))$(DEF)\n"
+	@$(MAKE) fclean -C $(dir $(LIB))
+
+re: fclean libclean all

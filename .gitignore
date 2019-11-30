@@ -1,7 +1,12 @@
 *
 !src/
-!src/*.c
+!src/ts_*.c
+!libft
+!tests/
+!tests/test_*.c
 !include/
 !include/*.h
 !Makefile
 !.gitignore
+!README.md
+!screenshot.png
