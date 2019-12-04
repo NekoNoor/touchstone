@@ -6,7 +6,8 @@
 !tests/test_*.c
 !include/
 !include/*.h
+!LICENSE
 !Makefile
-!.gitignore
 !README.md
+!.gitignore
 !screenshot.png
