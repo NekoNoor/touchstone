@@ -3,10 +3,10 @@
 /*                                                        ::::::::            */
 /*   touchstone.h                                       :+:    :+:            */
 /*                                                     +:+                    */
-/*   By: vincent <vvissche@student.codam.nl>          +#+                     */
+/*   By: vvissche <vvissche@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/11/26 14:22:53 by nschat         #+#    #+#                */
-/*   Updated: 2019/12/03 19:26:52 by vincent       ########   odam.nl         */
+/*   Updated: 2019/12/04 15:18:07 by vvissche      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,16 @@
 # define FAIL_MESSAGE "\x1B[97m[\x1B[91mFAIL\x1B[97m]\x1B[0m \x1B[93m"
 # define PASS_MESSAGE "\x1B[97m[\x1B[92mPASS\x1B[97m]\x1B[0m \x1B[93m"
 # define LINE_DIVIDER "\x1B[97m:\x1B[96m"
+# define DONE_MESSAGE "\x1B[97m[\x1B[32mDONE\x1B[97m]\x1B[0m \x1B[93m"
 # define ARROW_DIVIDER "\x1B[97m -> \x1B[94m"
+
+#ifdef TS_SETUP
+extern int	num_fail;
+extern int	num_pass;
+#else
+int	num_fail;
+int	num_pass;
+#endif
 
 # define ts_assert(result) \
 	(result) ? \
@@ -47,5 +56,7 @@ void	ts_pass(char *file, unsigned line, char *result);
 void	ts_fail(char *file, unsigned line, char *result);
 void	ts_pass_eq(char *file, unsigned line, char *result, char *expected);
 void	ts_fail_eq(char *file, unsigned line, char *result, char *expected);
+void	ts_setup();
+void	ts_finish();
 
 #endif
