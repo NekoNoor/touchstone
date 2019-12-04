@@ -6,13 +6,15 @@
 /*   By: vvissche <vvissche@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/11/30 21:08:40 by nschat         #+#    #+#                */
-/*   Updated: 2019/12/04 15:26:18 by vvissche      ########   odam.nl         */
+/*   Updated: 2019/12/04 15:59:44 by nschat        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#define TS_SETUP
 #include "touchstone.h"
 #include "libft.h"
+
+size_t	g_num_pass = 0;
+size_t	g_num_fail = 0;
 
 static void	ts_putstr(char *str)
 {
@@ -26,72 +28,62 @@ static void	ts_putulong(unsigned long n)
 	ft_putchar_fd((n % 10) + '0', 1);
 }
 
-void		ts_pass(char *file, unsigned line, char *result)
+void		ts_result(char *file, unsigned line, size_t expr, char *result)
 {
-	ts_putstr(PASS_MESSAGE);
+	if (expr)
+	{
+		ts_putstr(PASS_MESSAGE);
+		g_num_pass++;
+	}
+	else
+	{
+		ts_putstr(FAIL_MESSAGE);
+		g_num_fail++;
+	}
 	ts_putstr(file);
 	ts_putstr(LINE_DIVIDER);
 	ts_putulong(line);
 	ts_putstr(ARROW_DIVIDER);
 	ts_putstr(result);
-	ts_putstr(" is non-zero\n");
-	num_pass++;
+	if (expr)
+		ts_putstr(" is non-zero\n");
+	else
+		ts_putstr(" is zero\n");
 }
 
-void	ts_fail(char *file, unsigned line, char *result)
+void	ts_result_eq(char *file, unsigned line, size_t expr, char *result, char *expected)
 {
-	ts_putstr(FAIL_MESSAGE);
+	if (expr)
+	{
+		ts_putstr(PASS_MESSAGE);
+		g_num_pass++;
+	}
+	else
+	{
+		ts_putstr(FAIL_MESSAGE);
+		g_num_fail++;
+	}
 	ts_putstr(file);
 	ts_putstr(LINE_DIVIDER);
 	ts_putulong(line);
 	ts_putstr(ARROW_DIVIDER);
 	ts_putstr(result);
-	ts_putstr(" is zero\n");
-	num_fail++;
-}
-
-void	ts_pass_eq(char *file, unsigned line, char *result, char *expected)
-{
-	ts_putstr(PASS_MESSAGE);
-	ts_putstr(file);
-	ts_putstr(LINE_DIVIDER);
-	ts_putulong(line);
-	ts_putstr(ARROW_DIVIDER);
-	ts_putstr(result);
-	ts_putstr(" == ");
+	if (expr)
+		ts_putstr(" == ");
+	else
+		ts_putstr(" != ");
 	ts_putstr(expected);
 	ts_putstr("\n");
-	num_pass++;
-}
-
-void	ts_fail_eq(char *file, unsigned line, char *result, char *expected)
-{
-	ts_putstr(FAIL_MESSAGE);
-	ts_putstr(file);
-	ts_putstr(LINE_DIVIDER);
-	ts_putulong(line);
-	ts_putstr(ARROW_DIVIDER);
-	ts_putstr(result);
-	ts_putstr(" != ");
-	ts_putstr(expected);
-	ts_putstr("\n");
-	num_fail++;
 }
 
 void	ts_finish()
 {
 	ts_putstr(DONE_MESSAGE);
-	ts_putstr("\x1B[0;39mTested ");
-	ts_putulong(num_fail + num_pass);
-	ts_putstr(" | Passing: \x1B[0;32m");
-	ts_putulong(num_pass);
-	ts_putstr("\x1B[0;39m | Failing: \x1B[31m");
-	ts_putulong(num_fail);
-	ts_putstr("\x1B[39m\n");
-}
-
-void	ts_setup()
-{
-	num_pass = 0;
-	num_fail = 0;
+	ts_putstr("\x1B[0mTested: \x1B[93m");
+	ts_putulong(g_num_fail + g_num_pass);
+	ts_putstr("\x1B[0m | Passing: \x1B[92m");
+	ts_putulong(g_num_pass);
+	ts_putstr("\x1B[0m | Failing: \x1B[91m");
+	ts_putulong(g_num_fail);
+	ts_putstr("\x1B[0m\n");
 }
